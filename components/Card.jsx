@@ -114,11 +114,25 @@ const Card = props => {
     
                 localStorage.setItem('user', newId);
                 setPlayerId(newId)
-            }
-        } else {
-            alert('set up a name first');
-        }
 
+                const newPlayers = players;
+
+                const newPlayer = {
+                    id: newId,
+                    name,
+                }
+    
+                updateUser(newPlayer)
+    
+                newPlayers.push(newPlayer);
+
+                updateRoom({
+                    id: props.index,
+                    players: newPlayers
+                })
+            }
+
+            
         const playerData = await getUserById(playerId);
         
         if (!playerJoined() && playerData) {
@@ -138,6 +152,12 @@ const Card = props => {
                 players: newPlayers
             })
         }
+
+
+        } else {
+            alert('set up a name first');
+        }
+
    
     }
 

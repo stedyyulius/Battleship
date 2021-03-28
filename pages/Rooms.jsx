@@ -43,7 +43,7 @@ const Rooms = props => {
 
     return (
         <div>
-            <h1>titles</h1>
+            <h1 className="white-text">Version 1.00</h1>
             <Row>
                 {RoomList()}
             </Row>
