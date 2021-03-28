@@ -107,6 +107,12 @@ body {
   padding: 5px;
 }
 
+.cell img {
+  width: 40px;
+  width: 40px;
+  margin: auto;
+}
+
 .end-game-animation {
   position: absolute;
   height: 400px;

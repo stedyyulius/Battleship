@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import Image from 'next/image'
 
 import { Row } from 'antd';
 
@@ -30,7 +29,7 @@ const Board = props => {
             if (cells[i] === 1) {
                 result.push(
                     <div className="cell" key={i}>
-                        <Image src={'/assets/ship.png'} alt="ship" width={40} height={40} />
+                        <image src={'../assets/ship.png'} alt="ship" />
                     </div>
                 );
             }
@@ -39,7 +38,7 @@ const Board = props => {
             if (cells[i] === 3) {
                 result.push(
                     <div className="cell" key={i}>
-                        <Image src={'/assets/wrong.png'} alt="x" width={30} height={0} />
+                        <image src={'../assets/wrong.png'} alt="x" />
                     </div>
                 );
             }
@@ -47,7 +46,7 @@ const Board = props => {
             if (cells[i] === 4) {
                 result.push(
                 <div className="cell" key={i}>
-                    <Image src={'/assets/explosion.gif'} alt="explosion" width={20} height={10} /> 
+                    <image src={'../assets/explosion.gif'} alt="explosion" /> 
                 </div>
                 );
             }
