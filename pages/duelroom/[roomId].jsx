@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router'
+import Router, { useRouter } from 'next/router'
+import Image from 'next/image';
 
 import { Col, Row } from 'antd';
 
@@ -8,13 +9,22 @@ import totalShips from '../../constants/totalShips';
 import Board from '../../components/Board';
 import EnemyBoard from '../../components/EnemyBoard';
 
+import { unDestroyedShip } from '../../helpers/unDestroyedShip';
+import { victory } from '../../helpers/victory';
+import { draw } from '../../helpers/draw';
+
 import { getRoomDetails } from '../../api/room.js';
 
+let afkTimeout = null;
+let endGameInterval = null;
+
 const DuelRoom = props => {
-    const [players, setPlayers] = useState([]);
+    const [players, setPlayers] = useState([{}, {}]);
     const [boards, setBoards] = useState([]);
     const [playerId, setPlayerId] = useState(null);
-    const [roomData, setRoomData] = useState({})
+    const [roomData, setRoomData] = useState({});
+    const [winner, setWinner] = useState(null); 
+    const [endGameTimeout, setEndGameTimeout] = useState(20);
 
     const router = useRouter();
     const { roomId } = router.query;
@@ -24,25 +34,70 @@ const DuelRoom = props => {
 
         setPlayerId(id);
 
+        const unSubScribeRoom = async () => {
+            const roomSubscription = await getRoomDetails(roomId);
+            
+            roomSubscription.off();
+        }
+
         const subscribeRoom = async () => {
             const roomSubscription = await getRoomDetails(roomId);
             
             roomSubscription.on('value', snapshot => {
                 const data = snapshot.val();
-                
-                if (data) {
-                    setRoomData(data);
-                    setPlayers(data.players);
-                    setBoards(data.boards);
+
+                clearTimeout(afkTimeout);
+
+                if (data && data.boards && data.boards.length === 2) {
+                    
+                    const currentPlayerid = data.players.map((d) => d.id === id);
+
+                    const mi = currentPlayerid.indexOf(true);
+                    const oi = currentPlayerid.indexOf(false);
+
+                    if (data) {
+                        setRoomData(data);
+                        setPlayers(data.players);
+                        setBoards(data.boards);
+                    }
+
+                    const miLives = unDestroyedShip(data.boards[mi]);
+                    const oiLives = unDestroyedShip(data.boards[oi]);
+
+                    // setTimeout(() => {
+                    //     unSubScribeRoom();
+
+                    //     if (miLives > oiLives) {
+                    //         victory(data.players[mi], data);
+                    //         setWinner(data.players[mi]);
+                    //     }
+    
+                    //     if (oiLives > miLives) {
+                    //         victory(data.players[oi], data);
+                    //         setWinner(data.players[oi]);
+                    //     }
+    
+                    //     if (miLives === oiLives) {
+                    //         draw(data);
+                    //     }
+                      
+                    // }, 20000);
+
+                    if (miLives === 0) {
+                        unSubScribeRoom()
+                        victory(data.players[oi], data);
+                        setWinner(data.players[oi]);
+                    }
+
+                    if (oiLives === 0) {
+                        unSubScribeRoom();
+                        victory(data.players[mi], data);
+                        setWinner(data.players[mi]);
+                    }
+
                 }
    
             })
-        }
-
-        const unSubScribeRoom = async () => {
-            const roomSubscription = await getRoomDetails(roomId);
-            
-            roomSubscription.off();
         }
 
         subscribeRoom();
@@ -51,6 +106,21 @@ const DuelRoom = props => {
 
     }, [])
 
+    useEffect(() => {
+        if (winner) {
+            endGameInterval = setInterval(() => {
+                setEndGameTimeout((state) => state - 1)
+            }, 1000)
+        }
+    }, [winner])
+
+    useEffect(() => {
+        if (endGameTimeout === 0) {
+            Router.push('/');
+        }
+    }, [endGameTimeout])
+
+    
     const mainPlayerIndex = () => {
 
         for (let i = 0; i < players.length; i++) {
@@ -63,7 +133,7 @@ const DuelRoom = props => {
     }
 
     const opponentPlayerIndex = () => {
-        
+
         for (let i = 0; i < players.length; i++) {
             if (players[i] && players[i].id !== playerId) {
                 return i;
@@ -75,8 +145,6 @@ const DuelRoom = props => {
 
     const playerWins = (index) => {
         if (players[index]) {
-
-            console.log(players[index])
             return players[index].win;
         }
 
@@ -85,12 +153,48 @@ const DuelRoom = props => {
 
     const destroyedShip = (index) => {
         if (boards[index]) {
-            const unDestroyedShip = boards[index].join().match(/1/g);
-            console.log(unDestroyedShip)
-            return totalShips -  unDestroyedShip.length;
+
+            return totalShips - unDestroyedShip(boards[index]);
+            
         }
         return 0
     }
+
+    const lives = (index) => {
+        let result = [];
+
+        if (boards[index]) {
+            for (let i = 0; i < unDestroyedShip(boards[index]); i++) {
+                result.push(
+                    <Image key={i} src={'/assets/ship.png'} alt="ship" width={40} height={40} />
+                )
+            }
+        }
+
+        return result;
+    }
+
+    const endGameAnimation = (id) => {
+        
+        if (winner) {
+            if (winner.id === id) {
+                return  <img className="end-game-animation" src={'../../assets/victory.gif'} alt="win" />
+            } else {
+                return  <img className="end-game-animation" src={'../../assets/lose.gif'} alt="lose" />
+            }
+        }
+
+        return null;
+    }
+
+    const gameWilEnd = () => {
+        if (winner) {
+            return <h2 className="white-text">Game will end in {endGameTimeout}</h2>
+        }
+
+        return null;
+    }
+
 
     const mi = mainPlayerIndex();
     const oi = opponentPlayerIndex();
@@ -99,34 +203,51 @@ const DuelRoom = props => {
         <div className="duel-room">
             <Col span={9}>
                 <Row>
-                    <Col span={10}>
-                        <h1 className="white-text">Score: {destroyedShip(oi)}</h1>
-                    </Col>
                     <Col span={7}>
+                        <h1 className="white-text">{players[mi].name}</h1>
+                    </Col>
+                    <Col span={6}>
                         <h1 className="white-text">Win: {playerWins(mi)}</h1>
                     </Col>
+                    <Col span={10}>
+                        <Row gutter={15}>
+                            {lives(mi)}
+                        </Row>
+                    </Col>
                 </Row>
-               
+                {endGameAnimation(players[mi].id)}
                 <Board board={boards[mi]} boardIndex={mi} />
             </Col>
             <Col span={5} style={{textAlign:'center'}}>
-                <h3 className="white-text">Destroy {totalShips} ships to win</h3>
+                {(winner)
+                    ?  <h3 className="white-text">{winner.name} win!</h3>
+                    :  <h3 className="white-text">Destroy {totalShips} ships to win</h3>
+                }
                 <br />
                 <br />
                 <br />
-                <h1 className="white-text">ABC</h1>
+                <h1 className="white-text">{players[mi].name}: {destroyedShip(oi)}</h1>
                 <h1 className="white-text">VS</h1>
-                <h1 className="white-text">CBA</h1>
+                <h1 className="white-text">{players[oi].name}: {destroyedShip(mi)}</h1>
+                <br />
+                <br />
+                {gameWilEnd()}
             </Col>
             <Col span={9}>
                 <Row>
-                    <Col span={10}>
-                        <h1 className="white-text">Score: {destroyedShip(mi)}</h1>
+                    <Col span={7}>
+                        <h1 className="white-text">{players[oi].name}</h1>
                     </Col>
                     <Col span={7}>
                         <h1 className="white-text">Win: {playerWins(oi)}</h1>
                     </Col>
+                    <Col span={10}>
+                        <Row gutter={15}>
+                            {lives(oi)}
+                        </Row>
+                    </Col>
                 </Row>
+                {endGameAnimation(players[oi].id)}
                 <EnemyBoard board={boards[oi]} roomData={roomData} boardIndex={oi} />
             </Col>
         </div>

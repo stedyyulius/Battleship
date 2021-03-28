@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Col, Modal, Input } from 'antd';
 import { isMobile } from 'react-device-detect';
 import { UserOutlined } from '@ant-design/icons';
@@ -10,12 +10,21 @@ import { saveUserClient, getUserById, updateUser } from '../api/user';
 
 import { generateBoard } from '../helpers/generateBoard';
 
+import timerDuration from '../constants/timerDuration';
+
+let startInterval = null;
+let timer = timerDuration;
+let timerTimeout = null;
+
 const Card = props => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [name, setName] = useState('');
     const [players, setPlayers] = useState([]);
     const [playerId, setPlayerId] = useState(null);
 
+    const cardRef = useRef(null);
+    const seatRef = useRef(null);
+    
     useEffect(() => {
 
         const registered = localStorage.getItem('user');
@@ -24,16 +33,58 @@ const Card = props => {
         setPlayerId(registered);
         setName(cachedName);
 
-        return () => setIsModalVisible(false);
+        clearInterval(startInterval);
+
+        return () =>{ 
+            clearInterval(startInterval);
+            timer = timerDuration
+            setIsModalVisible(false);
+        }
 
     }, [])
 
     useEffect(() => {
         const currentRoom = props.allRooms[props.index];
+        
         if (currentRoom) {
 
-            if (currentRoom.isStart) {
+            if (currentRoom.players) {
+                const occupiedSeat = currentRoom.players.length / 2 * 100;
+                seatRef.current.style.width = `${occupiedSeat}%`;
+
+                if (occupiedSeat === 100) {
+                    cardRef.current.style['background-image'] = 'url("../assets/war.gif")';
+                } else {
+                    cardRef.current.style['background-image'] = 'url("../assets/idle.gif")';
+                }
+
+            }
+
+            if (currentRoom.timer) {
+                
+                clearTimeout(timerTimeout);
+
+                timerTimeout= setTimeout(() => {
+                        updateRoom({
+                            ...currentRoom,
+                            timer: false
+                        })
+                    }, 1500);
+            }
+
+            if (currentRoom.timer === 0) {
+                
                 Router.push(`/duelroom/${props.index}`);
+            }
+
+            if (currentRoom.timer && currentRoom.players.length < 2) {
+                clearInterval(startInterval);
+                timer = timerDuration;
+
+                updateRoom({
+                    ...currentRoom,
+                    timer: false
+                })
             }
 
             setPlayers(props.allRooms[props.index].players || [])
@@ -135,19 +186,32 @@ const Card = props => {
 
     const start = () => {
 
-        updateRoom({
-            id: props.index,
-            players,
-            boards: [generateBoard(), generateBoard()],
-            isStart: true 
-        })
+       startInterval = setInterval(() => {
+            const beepSound = new Audio('../assets/sounds/beep.mp3');
+
+            beepSound.play();
+
+            let newTimer = timer -= 1
+
+            updateRoom({
+                id: props.index,
+                players,
+                boards: [generateBoard(), generateBoard()], 
+                timer: newTimer
+            })
+
+        }, 1000)
 
     }
 
     const roomButton = () => {
 
+        if (props.allRooms[props.index] && typeof props.allRooms[props.index].timer === 'number') {
+            return  <button className="btn">{props.allRooms[props.index].timer.toString()}</button>
+        }
+
         if (players.length === 2) {
-            return  <button className="btn" onClick={() =>  start() }>Start</button>
+            return  <button className="btn" onClick={() => start() }>Start</button>
         }
 
         return  <button className="btn" onClick={() =>  setIsModalVisible(true)} disabled={isJoinedPlayer() || players.length === 2}>Enter</button>
@@ -162,13 +226,12 @@ const Card = props => {
     return (
         <Col span={isMobile ? 12 : 6}>
             {userRegisterModal()}
-            <div className="card-container">
+            <div className="card-container" ref={cardRef}>
                 <div className="card-body">
                     <div className="progress-container">
-                        <div className="progress"></div>
-                        <span className="progress-text">
-                            1/2 Challenges
-                        </span>
+                        <div className="progress" >
+                            <div className="seat"ref={seatRef}></div>
+                        </div>
                     </div>
                     <div className="players">
                        {playerList()}

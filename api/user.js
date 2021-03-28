@@ -9,9 +9,14 @@ export const saveUserClient = (user) => {
 }
 
 export const getUserById = async (id) => {
-  const data = await db.ref('users').child(id).once('value');
+  if (id) {
+    const data = await db.ref('users').child(id).once('value');
 
-  return data;
+    return data;
+  }
+
+  return null;
+
 }
 
 export const updateUser = details => {
