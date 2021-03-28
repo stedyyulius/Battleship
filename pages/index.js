@@ -1,5 +1,3 @@
-import 'antd/dist/antd.css'
-
 import Rooms from './Rooms';
 
 export default function Home() {

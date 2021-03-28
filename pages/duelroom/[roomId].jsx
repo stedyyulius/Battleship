@@ -26,8 +26,14 @@ const DuelRoom = props => {
     const [winner, setWinner] = useState(null); 
     const [endGameTimeout, setEndGameTimeout] = useState(20);
 
-    const router = useRouter();
-    const { roomId } = router.query;
+    let url = null;
+    let roomId = null;
+
+    if (typeof window !== 'undefined') {
+         url = window.location.href.split('/');
+         roomId = url[url.length - 1];
+    }
+
 
     useEffect(() => {
         const id = localStorage.getItem('user');
@@ -42,7 +48,7 @@ const DuelRoom = props => {
 
         const subscribeRoom = async () => {
             const roomSubscription = await getRoomDetails(roomId);
-            
+
             roomSubscription.on('value', snapshot => {
                 const data = snapshot.val();
 

@@ -57,7 +57,6 @@ const Card = props => {
                 } else {
                     cardRef.current.style['background-image'] = 'url("../assets/idle.gif")';
                 }
-
             }
 
             if (currentRoom.timer) {
@@ -73,7 +72,7 @@ const Card = props => {
             }
 
             if (currentRoom.timer === 0) {
-                
+                console.log(currentRoom.timer)
                 Router.push(`/duelroom/${props.index}`);
             }
 
@@ -113,6 +112,7 @@ const Card = props => {
                 });
     
                 localStorage.setItem('user', newId);
+                
                 setPlayerId(newId)
 
                 const newPlayers = players;

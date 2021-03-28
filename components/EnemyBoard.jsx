@@ -19,8 +19,8 @@ const EnemyBoard = props => {
 
     const fire = (index) => {
 
-        const fireSound = new Audio('../public/assets/sounds/laser.mp3');
-        const shipHit = new Audio('../public/assets/sounds/explosion.wav');
+        const fireSound = new Audio('../assets/sounds/laser.mp3');
+        const shipHit = new Audio('../assets/sounds/explosion.wav');
 
         const newBoard = props.roomData.boards;
 

@@ -29,16 +29,15 @@ const Board = props => {
             if (cells[i] === 1) {
                 result.push(
                     <div className="cell" key={i}>
-                        <image src={'../assets/ship.png'} alt="ship" />
+                        <img src={'../assets/ship.png'} alt="ship" />
                     </div>
                 );
             }
 
-
             if (cells[i] === 3) {
                 result.push(
                     <div className="cell" key={i}>
-                        <image src={'../assets/wrong.png'} alt="x" />
+                        <img src={'../assets/wrong.png'} alt="x" />
                     </div>
                 );
             }
@@ -50,14 +49,13 @@ const Board = props => {
                 </div>
                 );
             }
-            
         }
 
         return result;
     }
 
     return (
-        <Row gutter={24}>
+        <Row gutter={15}>
             {displayBoard()}
         </Row>
     )
