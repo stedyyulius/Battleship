@@ -13,6 +13,9 @@ body {
   max-width: 100%;
   margin: 20px;
   overflow: hidden;
+  display: block;
+  flex: 0 0 33%;
+  max-width: 33%;
 }
 
 .card-body {
@@ -93,6 +96,19 @@ body {
   justify-content: space-between;
 }
 
+.board-container {
+  display: block;
+  flex: 0 0 37.5%;
+  max-width: 37.5%;
+}
+
+.middle-container {
+  display: block;
+  flex: 0 0 20.83333333%;
+  max-width: 20.83333333%;
+  text-align: center;
+}
+
 .white-text {
   color: white;
 }
@@ -125,4 +141,43 @@ body {
   height: 400px;
   width: 500px;
   margin-left: -12px;
+}
+
+@media (max-width: 780px) {
+  .card-container {
+    background-image: url("../public/assets/idle.gif");
+    border-radius: 10px;
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    max-width: 100%;
+    margin: 20px;
+    overflow: hidden;
+    display: block;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .duel-room {
+    padding: 50px;
+    display: block;
+  }
+
+  .board-container {
+    display: block;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .middle-container {
+    display: block;
+    flex: 0 0 100%;
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .cell img {
+    width: 20px;
+    width: 20px;
+    margin: auto;
+  }
 }

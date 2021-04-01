@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import Router, { useRouter } from 'next/router'
+import Router from 'next/router'
 import Image from 'next/image';
+import { isMobile } from 'react-device-detect';
 
 import { Col, Row } from 'antd';
 
@@ -11,7 +12,6 @@ import EnemyBoard from '../../components/EnemyBoard';
 
 import { unDestroyedShip } from '../../helpers/unDestroyedShip';
 import { victory } from '../../helpers/victory';
-import { draw } from '../../helpers/draw';
 
 import { getRoomDetails } from '../../api/room.js';
 
@@ -50,11 +50,12 @@ const DuelRoom = props => {
             const roomSubscription = await getRoomDetails(roomId);
 
             roomSubscription.on('value', snapshot => {
+                
                 const data = snapshot.val();
 
                 clearTimeout(afkTimeout);
 
-                if (data && data.boards && data.boards.length === 2) {
+                if (data && data.boards && data.boards.length === 2 && data.players) {
                     
                     const currentPlayerid = data.players.map((d) => d.id === id);
 
@@ -70,37 +71,39 @@ const DuelRoom = props => {
                     const miLives = unDestroyedShip(data.boards[mi]);
                     const oiLives = unDestroyedShip(data.boards[oi]);
 
-                    // setTimeout(() => {
-                    //     unSubScribeRoom();
-
-                    //     if (miLives > oiLives) {
-                    //         victory(data.players[mi], data);
-                    //         setWinner(data.players[mi]);
-                    //     }
+                        // setTimeout(() => {
+                        //     unSubScribeRoom();
     
-                    //     if (oiLives > miLives) {
-                    //         victory(data.players[oi], data);
-                    //         setWinner(data.players[oi]);
-                    //     }
+                        //     if (miLives > oiLives) {
+                        //         victory(data.players[mi], data);
+                        //         setWinner(data.players[mi]);
+                        //     }
+        
+                        //     if (oiLives > miLives) {
+                        //         victory(data.players[oi], data);
+                        //         setWinner(data.players[oi]);
+                        //     }
+        
+                        //     if (miLives === oiLives) {
+                        //         draw(data);
+                        //     }
+                          
+                        // }, 20000);
     
-                    //     if (miLives === oiLives) {
-                    //         draw(data);
-                    //     }
-                      
-                    // }, 20000);
-
-                    if (miLives === 0) {
-                        unSubScribeRoom()
-                        victory(data.players[oi], data);
-                        setWinner(data.players[oi]);
-                    }
-
-                    if (oiLives === 0) {
-                        unSubScribeRoom();
-                        victory(data.players[mi], data);
-                        setWinner(data.players[mi]);
-                    }
-
+                        if (miLives === 0) {
+                            unSubScribeRoom()
+                            victory(data.players[oi], data);
+                            setWinner(data.players[oi]);
+                        }
+    
+                        if (oiLives === 0) {
+                            unSubScribeRoom();
+                            victory(data.players[mi], data);
+                            setWinner(data.players[mi]);
+                        }
+                } else {
+                    unSubScribeRoom()
+                    Router.push('/');
                 }
    
             })
@@ -207,7 +210,7 @@ const DuelRoom = props => {
 
     return (
         <div className="duel-room">
-            <Col span={9}>
+            <div className="board-container">
                 <Row>
                     <Col span={7}>
                         <h1 className="white-text">{players[mi].name}</h1>
@@ -223,8 +226,8 @@ const DuelRoom = props => {
                 </Row>
                 {endGameAnimation(players[mi].id)}
                 <Board board={boards[mi]} boardIndex={mi} />
-            </Col>
-            <Col span={5} style={{textAlign:'center'}}>
+            </div>
+            <div className="middle-container">
                 {(winner)
                     ?  <h3 className="white-text">{winner.name} win!</h3>
                     :  <h3 className="white-text">Destroy {totalShips} ships to win</h3>
@@ -238,8 +241,8 @@ const DuelRoom = props => {
                 <br />
                 <br />
                 {gameWilEnd()}
-            </Col>
-            <Col span={9}>
+            </div>
+            <div className="board-container">
                 <Row>
                     <Col span={7}>
                         <h1 className="white-text">{players[oi].name}</h1>
@@ -255,7 +258,7 @@ const DuelRoom = props => {
                 </Row>
                 {endGameAnimation(players[oi].id)}
                 <EnemyBoard board={boards[oi]} roomData={roomData} boardIndex={oi} />
-            </Col>
+            </div>
         </div>
     )
 }

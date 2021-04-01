@@ -47,16 +47,16 @@ const Card = props => {
 
         if (currentRoom) {
 
-            if (currentRoom.players) {
-                const occupiedSeat = currentRoom.players.length / 2 * 100;
-                seatRef.current.style.width = `${occupiedSeat}%`;
+        const detectedPlayers = (currentRoom.players) ? currentRoom.players.length : 0;
+        const occupiedSeat = detectedPlayers / 2 * 100;
+        seatRef.current.style.width = `${occupiedSeat}%`;
 
-                if (occupiedSeat === 100) {
-                    cardRef.current.style['background-image'] = 'url("../assets/war.gif")';
-                } else {
-                    cardRef.current.style['background-image'] = 'url("../assets/idle.gif")';
-                }
-            }
+        if (occupiedSeat === 100) {
+            cardRef.current.style['background-image'] = 'url("../assets/war.gif")';
+            cardRef.current.style['background-size'] = 'cover';
+        } else {
+            cardRef.current.style['background-image'] = 'url("../assets/idle.gif")';
+        }
 
             if (currentRoom.timer) {
                 
@@ -71,7 +71,7 @@ const Card = props => {
             }
 
             if (currentRoom.timer === 0) {
-                console.log(currentRoom.timer)
+                clearTimeout(timerTimeout);
                 Router.push(`/duelroom/${props.index}`);
             }
 
@@ -249,23 +249,21 @@ const Card = props => {
     }
 
     return (
-        <Col span={isMobile ? 12 : 8}>
+        <div className="card-container" ref={cardRef}>
             {userRegisterModal()}
-            <div className="card-container" ref={cardRef}>
-                <div className="card-body">
-                    <div className="progress-container">
-                        <div className="progress" >
-                            <div className="seat"ref={seatRef}></div>
-                        </div>
+            <div className="card-body">
+                <div className="progress-container">
+                    <div className="progress" >
+                        <div className="seat"ref={seatRef}></div>
                     </div>
-                    <div className="players">
-                       {playerList()}
-                    </div>
-                    {leaveButton()}
-                    {roomButton()}
                 </div>
+                <div className="players">
+                    {playerList()}
+                </div>
+                {leaveButton()}
+                {roomButton()}
             </div>
-        </Col>
+        </div>
     )
 }
 
