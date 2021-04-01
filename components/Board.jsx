@@ -37,7 +37,7 @@ const Board = props => {
             if (cells[i] === 3) {
                 result.push(
                     <div className="cell" key={i}>
-                        <img src={'../assets/wrong.png'} alt="x" />
+                        <img src={'../assets/dodge.png'} alt="x" />
                     </div>
                 );
             }

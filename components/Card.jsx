@@ -24,7 +24,7 @@ const Card = props => {
 
     const cardRef = useRef(null);
     const seatRef = useRef(null);
-    
+
     useEffect(() => {
 
         const registered = localStorage.getItem('user');
@@ -38,14 +38,13 @@ const Card = props => {
         return () =>{ 
             clearInterval(startInterval);
             timer = timerDuration
-            setIsModalVisible(false);
         }
 
     }, [])
 
     useEffect(() => {
         const currentRoom = props.allRooms[props.index];
-        
+
         if (currentRoom) {
 
             if (currentRoom.players) {
@@ -89,6 +88,11 @@ const Card = props => {
             setPlayers(props.allRooms[props.index].players || [])
         }
     }, [props.allRooms])
+
+            
+    if (typeof window !== 'undefined') {
+        window.addEventListener("unload", () => leave());
+    }
 
     const playerJoined = () => {
 
@@ -183,12 +187,13 @@ const Card = props => {
     }
 
     const leave = () => {
+
         updateRoom({
             id: props.index,
             players: players.filter((p) => p.id !== playerId)
         })
     }
-
+    
     const isJoinedPlayer = () => {
         for (const r of props.allRooms) {
             if (r.players && r.players.length > 0) {
@@ -244,7 +249,7 @@ const Card = props => {
     }
 
     return (
-        <Col span={isMobile ? 12 : 6}>
+        <Col span={isMobile ? 12 : 8}>
             {userRegisterModal()}
             <div className="card-container" ref={cardRef}>
                 <div className="card-body">

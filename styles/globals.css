@@ -84,6 +84,7 @@ body {
 
 .btn:disabled {
   background-color: #5f6670;
+  cursor: not-allowed;
 }
 
 .duel-room {

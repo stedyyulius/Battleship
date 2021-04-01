@@ -34,7 +34,7 @@ const Rooms = props => {
     const RoomList = () => {
         const result = [];
 
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 2; i++) {
             result.push(<Card key={i} index={i} allRooms={allRooms} />);
         }
 
