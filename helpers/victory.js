@@ -1,5 +1,3 @@
-import Router from 'next/router';
-
 import { updateUser } from '../api/user';
 import { updateRoom } from '../api/room';
 
@@ -14,10 +12,8 @@ export const victory = (user, room) => {
         id: room.id,
         boards: [],
         players: [],
-        timer: false
+        status: 'idle'
     })
 
     alert(`${user.name} Win!`);
-
-    // Router.push('/');
-} 
+}

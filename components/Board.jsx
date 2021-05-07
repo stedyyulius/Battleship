@@ -7,7 +7,7 @@ const Board = props => {
     const [cells, setCells] = useState([]);
 
     useEffect(() => {
-        
+
         if (props.board) {
             setCells(props.board);
         }
@@ -44,9 +44,9 @@ const Board = props => {
 
             if (cells[i] === 4) {
                 result.push(
-                <div className="cell" key={i}>
-                    <image src={'../assets/explosion.gif'} alt="explosion" /> 
-                </div>
+                    <div className="cell" key={i}>
+                        <img src={'../assets/explosion.gif'} alt="explosion" />
+                    </div>
                 );
             }
         }

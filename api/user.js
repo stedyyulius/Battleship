@@ -1,11 +1,9 @@
 import db from '../firebase/clientApp'
 
 export const saveUserClient = (user) => {
-  db.ref('users/' + user.id).set({
-      id: user.id,
-      win: 0,
-      name: user.name,
-    });
+  db.ref('users/' + user.id).set(user);
+
+  return null;
 }
 
 export const getUserById = async (id) => {
@@ -22,5 +20,7 @@ export const getUserById = async (id) => {
 export const updateUser = details => {
   const userRef = db.ref(`users/${details.id}`);
   userRef.update(details);
+
+  return null;
 }
 

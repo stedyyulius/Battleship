@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Col, Modal, Input } from 'antd';
-import { isMobile } from 'react-device-detect';
+import { Modal, Input } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import Router from 'next/router'
 import { v1 } from 'uuid';
@@ -13,14 +12,13 @@ import { generateBoard } from '../helpers/generateBoard';
 import timerDuration from '../constants/timerDuration';
 
 let startInterval = null;
-let timer = timerDuration;
-let timerTimeout = null;
 
 const Card = props => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [name, setName] = useState('');
     const [players, setPlayers] = useState([]);
     const [playerId, setPlayerId] = useState(null);
+    const [timer, setTimer] = useState(null);
 
     const cardRef = useRef(null);
     const seatRef = useRef(null);
@@ -35,61 +33,59 @@ const Card = props => {
 
         clearInterval(startInterval);
 
-        return () =>{ 
+        return () => {
             clearInterval(startInterval);
-            timer = timerDuration
         }
 
     }, [])
+
 
     useEffect(() => {
         const currentRoom = props.allRooms[props.index];
 
         if (currentRoom) {
 
-        const detectedPlayers = (currentRoom.players) ? currentRoom.players.length : 0;
-        const occupiedSeat = detectedPlayers / 2 * 100;
-        seatRef.current.style.width = `${occupiedSeat}%`;
+            const detectedPlayers = (currentRoom.players) ? currentRoom.players.length : 0;
+            const occupiedSeat = detectedPlayers / 2 * 100;
+            seatRef.current.style.width = `${occupiedSeat}%`;
 
-        if (occupiedSeat === 100) {
-            cardRef.current.style['background-image'] = 'url("../assets/war.gif")';
-            cardRef.current.style['background-size'] = 'cover';
-        } else {
-            cardRef.current.style['background-image'] = 'url("../assets/idle.gif")';
-        }
-
-            if (currentRoom.timer) {
-                
-                clearTimeout(timerTimeout);
-
-                timerTimeout= setTimeout(() => {
-                        updateRoom({
-                            ...currentRoom,
-                            timer: false
-                        })
-                    }, 1500);
+            if (occupiedSeat === 100) {
+                cardRef.current.style['background-image'] = 'url("../assets/war.gif")';
+                cardRef.current.style['background-size'] = 'cover';
+            } else {
+                cardRef.current.style['background-image'] = 'url("../assets/idle.gif")';
             }
 
-            if (currentRoom.timer === 0) {
-                clearTimeout(timerTimeout);
-                Router.push(`/duelroom/${props.index}`);
-            }
+            if (currentRoom.status === 'start' && !timer) {
 
-            if (currentRoom.timer && currentRoom.players.length < 2) {
-                clearInterval(startInterval);
-                timer = timerDuration;
+                setTimer(timerDuration);
 
-                updateRoom({
-                    ...currentRoom,
-                    timer: false
-                })
+                startInterval = setInterval(() => {
+                    const beepSound = new Audio('../assets/sounds/beep.mp3');
+
+                    beepSound.play();
+
+                    setTimer((previousTime) => previousTime - 1)
+
+                }, 1000)
             }
 
             setPlayers(props.allRooms[props.index].players || [])
         }
     }, [props.allRooms])
 
-            
+    useEffect(() => {
+        if (timer === 0) {
+            Router.push(`/duelroom/${props.index}`);
+        }
+        if (players.length < 2) {
+            clearInterval(startInterval);
+            setTimer(null);
+        }
+
+    }, [timer])
+
+
     if (typeof window !== 'undefined') {
         window.addEventListener("unload", () => leave());
     }
@@ -97,7 +93,7 @@ const Card = props => {
     const playerJoined = () => {
 
         const exist = players.filter((p) => p.id === playerId);
-        
+
         return exist.length > 0;
     };
 
@@ -106,28 +102,26 @@ const Card = props => {
         if (name) {
             setIsModalVisible(false);
             localStorage.setItem('name', name);
-    
+
             if (!playerId) {
                 const newId = v1();
-      
-               saveUserClient({
-                    id: newId,
-                    name,
-                });
-    
-                localStorage.setItem('user', newId);
-                
-                setPlayerId(newId)
-
-                const newPlayers = players;
 
                 const newPlayer = {
                     id: newId,
                     name,
+                    win: 0
                 }
-    
+
+                saveUserClient(newPlayer);
+
+                localStorage.setItem('user', newId);
+
+                setPlayerId(newId)
+
+                const newPlayers = players;
+
                 updateUser(newPlayer)
-    
+
                 newPlayers.push(newPlayer);
 
                 updateRoom({
@@ -136,64 +130,72 @@ const Card = props => {
                 })
             }
 
-            
-        const playerData = await getUserById(playerId);
-        
-        if (!playerJoined() && playerData) {
-            const newPlayers = players;
 
-            const newPlayer = {
-                ...playerData.val(),
-                name
+            const playerData = await getUserById(playerId);
+
+            if (!playerJoined() && playerData) {
+                const newPlayers = players;
+
+                const newPlayer = {
+                    ...playerData.val(),
+                    name
+                }
+
+                updateUser(newPlayer)
+
+                newPlayers.push(newPlayer);
+
+                updateRoom({
+                    id: props.index,
+                    players: newPlayers
+                })
             }
-
-            updateUser(newPlayer)
-
-            newPlayers.push(newPlayer);
-
-            updateRoom({
-                id: props.index,
-                players: newPlayers
-            })
-        }
 
 
         } else {
             alert('set up a name first');
         }
 
-   
+
     }
 
     const userRegisterModal = () => {
         return (
-          <Modal 
-          title="Enter Name" 
-          visible={isModalVisible}
-          onOk={() => enterRoom()}
-          onCancel={() => setIsModalVisible(false)}
-          >
-            <Input 
-            defaultValue={name}
-            onChange={(e) => setName(e.target.value) } />
-          </Modal>
+            <Modal
+                title="Enter Name"
+                visible={isModalVisible}
+                onOk={() => enterRoom()}
+                onCancel={() => setIsModalVisible(false)}
+                okButtonProps={{
+                    className: 'set-username-btn'
+                }}
+            >
+                <Input
+                    className="player-name-input"
+                    autoFocus
+                    defaultValue={name}
+                    onChange={(e) => setName(e.target.value)} />
+            </Modal>
         )
     }
 
     const playerList = () => {
         return players.map((player, index) =>
-            <p key={index}><UserOutlined />&nbsp;{player.name}</p>
+            <p key={index} className="player-name"><UserOutlined />&nbsp;{player.name}</p>
         )
     }
 
     const leave = () => {
 
+        clearInterval(startInterval);
+
         updateRoom({
             id: props.index,
-            players: players.filter((p) => p.id !== playerId)
+            players: players.filter((p) => p.id !== playerId),
+            status: 'idle'
         })
     }
-    
+
     const isJoinedPlayer = () => {
         for (const r of props.allRooms) {
             if (r.players && r.players.length > 0) {
@@ -211,40 +213,31 @@ const Card = props => {
 
     const start = () => {
 
-       startInterval = setInterval(() => {
-            const beepSound = new Audio('../assets/sounds/beep.mp3');
-
-            beepSound.play();
-
-            let newTimer = timer -= 1
-
-            updateRoom({
-                id: props.index,
-                players,
-                boards: [generateBoard(), generateBoard()], 
-                timer: newTimer
-            })
-
-        }, 1000)
+        updateRoom({
+            id: props.index,
+            players,
+            boards: [generateBoard(), generateBoard()],
+            status: 'start'
+        })
 
     }
 
     const roomButton = () => {
 
-        if (props.allRooms[props.index] && typeof props.allRooms[props.index].timer === 'number') {
-            return  <button className="btn">{props.allRooms[props.index].timer.toString()}</button>
+        if (timer) {
+            return <button className="btn">{timer}</button>
         }
 
         if (players.length === 2) {
-            return  <button className="btn" onClick={() => start() }>Start</button>
+            return <button className="btn start-button" onClick={() => start()}>Start</button>
         }
 
-        return  <button className="btn" onClick={() =>  setIsModalVisible(true)} disabled={isJoinedPlayer() || players.length === 2}>Enter</button>
+        return <button className={`btn enter-button-${props.index}`} onClick={() => setIsModalVisible(true)} disabled={isJoinedPlayer() || players.length === 2}>Enter</button>
     }
 
     const leaveButton = () => {
         if (playerJoined()) {
-            return <button className="leave-button" onClick={() =>  leave()}>Leave</button>
+            return <button className="leave-button" onClick={() => leave()}>Leave</button>
         }
     }
 
@@ -254,7 +247,7 @@ const Card = props => {
             <div className="card-body">
                 <div className="progress-container">
                     <div className="progress" >
-                        <div className="seat"ref={seatRef}></div>
+                        <div className="seat" ref={seatRef}></div>
                     </div>
                 </div>
                 <div className="players">

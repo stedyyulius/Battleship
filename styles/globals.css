@@ -1,21 +1,57 @@
 @import url("https://fonts.googleapis.com/css?family=Muli&display=swap");
 
+@keyframes shine {
+  0% {
+    transform: translateX(-30px) rotate(45deg);
+  }
+
+  100% {
+    transform: translateX(250px) rotate(45deg);
+  }
+}
+
 body {
   background-image: url("../public/assets/stars.jpg");
   background-size: cover;
+  padding: 10px;
 }
 
 .card-container {
-  background-image: url("../public/assets/idle.gif");
+  /* background-image: url("../public/assets/idle.gif");
   border-radius: 10px;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
   display: flex;
-  max-width: 100%;
   margin: 20px;
   overflow: hidden;
   display: block;
   flex: 0 0 33%;
   max-width: 33%;
+  width: 250px; */
+  color: #ffffff;
+  width: 250px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-container:hover::after {
+  content: "";
+  display: block;
+  width: 75px;
+  height: 150%;
+  background: linear-gradient(
+    90deg,
+    rgba(160, 64, 168) 0%,
+    rgba(255, 255, 255, 1) 25%,
+    rgba(255, 255, 255, 1) 75%,
+    rgba(255, 255, 255, 1) 75%,
+    rgba(160, 64, 168) 100%
+  );
+  opacity: 0.5;
+  position: absolute;
+  top: -50px;
+  left: 50px;
+  animation: shine 200ms linear;
+  transform: translateX(250px) rotate(-25deg);
 }
 
 .card-body {

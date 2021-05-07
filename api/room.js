@@ -3,7 +3,7 @@ import db from '../firebase/clientApp'
 export const getRooms = async (id) => {
 
   const room = await db.ref(`rooms`);
-  
+
   return room;
 }
 
@@ -11,7 +11,7 @@ export const getRooms = async (id) => {
 export const getRoomDetails = async (id) => {
 
   const room = await db.ref(`rooms/${id}`);
-  
+
   return room;
 }
 
@@ -21,11 +21,15 @@ export const saveNewRoom = details => {
     players: details.players,
     board: [[], []]
   });
+
+  return null;
 }
 
 export const updateRoom = details => {
   const roomRef = db.ref(`rooms/${details.id}`);
   roomRef.update(details);
+
+  return null;
 }
 
 

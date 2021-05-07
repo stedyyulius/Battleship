@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Col, Row } from 'antd';
+import { Row } from 'antd';
 
 import Card from '../components/Card';
 
@@ -13,21 +13,21 @@ const Rooms = props => {
 
         const subscribeRoom = async () => {
             const roomSubscription = await getRooms();
-      
-             roomSubscription.on('value', snapshot => {
+
+            roomSubscription.on('value', snapshot => {
                 setAllRooms(snapshot.val());
             });
         }
 
         const unSubscribeRoom = async () => {
             const roomSubscription = await getRooms();
-      
-             roomSubscription.off();
+
+            roomSubscription.off();
         }
 
         subscribeRoom()
 
-    return () => unSubscribeRoom();
+        return () => unSubscribeRoom();
 
     }, [])
 
