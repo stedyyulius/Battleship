@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 const playerOneName = 'stedy';
 const playerTwoName = 'poppy';
 
-describe('entry and leave room', () => {
+describe('room integration test', () => {
 
     let browser;
     let page;
@@ -16,6 +16,7 @@ describe('entry and leave room', () => {
         })
 
         page = await browser.newPage();
+        
         await page.goto('http://localhost:3000');
 
         secondBrowser = await puppeteer.launch({
@@ -23,7 +24,8 @@ describe('entry and leave room', () => {
         })
 
         secondPage = await secondBrowser.newPage();
-        await secondPage.goto('http://localhost:3000')
+        
+        await secondPage.goto('http://localhost:3000');
     })
 
     afterAll(() => {
@@ -31,7 +33,7 @@ describe('entry and leave room', () => {
         setTimeout(async () => {
             await browser.close();
             await secondBrowser.close();
-        }, 10000)
+        }, 10000);
     })
 
     test('player one should be able to join room', async () => {
@@ -92,7 +94,7 @@ describe('entry and leave room', () => {
         }, 6000)
     })
 
-    test('start button should appear', async () => {
+    test('start button should appear when 2 players inside a room', async () => {
 
         setTimeout(async () => {
             const enterButton = await page.$('button.enter-button-0');
@@ -126,4 +128,5 @@ describe('entry and leave room', () => {
         }, 9000)
 
     })
+    
 })
