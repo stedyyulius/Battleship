@@ -17,16 +17,6 @@ body {
 }
 
 .card-container {
-  /* background-image: url("../public/assets/idle.gif");
-  border-radius: 10px;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
-  display: flex;
-  margin: 20px;
-  overflow: hidden;
-  display: block;
-  flex: 0 0 33%;
-  max-width: 33%;
-  width: 250px; */
   color: #ffffff;
   width: 250px;
   position: relative;

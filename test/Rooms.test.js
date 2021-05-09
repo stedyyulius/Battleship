@@ -11,29 +11,36 @@ describe('room integration test', () => {
     let secondPage;
 
     beforeAll(async () => {
+
         browser = await puppeteer.launch({
-            headless: false
+            headless: false,
         })
 
         page = await browser.newPage();
-        
+
         await page.goto('http://localhost:3000');
 
         secondBrowser = await puppeteer.launch({
-            headless: false
+            headless: false,
+            slowMo: 500
         })
 
         secondPage = await secondBrowser.newPage();
-        
+
         await secondPage.goto('http://localhost:3000');
     })
 
-    afterAll(() => {
+    afterAll(async () => {
+        const playerOneLeaveButton = await page.$('button.leave-button');
 
-        setTimeout(async () => {
-            await browser.close();
-            await secondBrowser.close();
-        }, 10000);
+        await playerOneLeaveButton.evaluate(btn => btn.click());
+
+        const playerTwoLeaveButton = await secondPage.$('button.leave-button');
+
+        await playerTwoLeaveButton.evaluate(btn => btn.click());
+
+        await browser.close();
+        await secondBrowser.close();
     })
 
     test('player one should be able to join room', async () => {
@@ -56,77 +63,67 @@ describe('room integration test', () => {
 
     })
 
-    test('player 2 able to join a room', () => {
+    test('player 2 able to join a room', async () => {
 
-        setTimeout(async () => {
-            const enterButton = await secondPage.$('button.enter-button-0');
 
-            await enterButton.evaluate(btn => btn.click());
+        const enterButton = await secondPage.$('button.enter-button-0');
 
-            await secondPage.keyboard.type(playerTwoName);
+        await enterButton.evaluate(btn => btn.click());
 
-            const setUsernameButton = await secondPage.$('button.set-username-btn');
+        await secondPage.keyboard.type(playerTwoName);
 
-            await setUsernameButton.evaluate(btn => btn.click());
-        }, 3000)
+        const setUsernameButton = await secondPage.$('button.set-username-btn');
 
-    })
+        await setUsernameButton.evaluate(btn => btn.click());
 
-    test('players one to leave room', () => {
-
-        setTimeout(async () => {
-
-            const playerOneLeaveButton = await page.$('button.leave-button');
-
-            await playerOneLeaveButton.evaluate(btn => btn.click());
-
-        }, 5000)
 
     })
 
-    test('player two able to leave room', () => {
+    test('players one to leave room', async () => {
 
-        setTimeout(async () => {
+        const playerOneLeaveButton = await page.$('button.leave-button');
 
-            const playerTwoLeaveButton = await secondPage.$('button.leave-button');
+        await playerOneLeaveButton.evaluate(btn => btn.click());
 
-            await playerTwoLeaveButton.evaluate(btn => btn.click());
-        }, 6000)
+
+    })
+
+    test('player two able to leave room', async () => {
+
+        const playerTwoLeaveButton = await secondPage.$('button.leave-button');
+
+        await playerTwoLeaveButton.evaluate(btn => btn.click());
+
     })
 
     test('start button should appear when 2 players inside a room', async () => {
 
-        setTimeout(async () => {
-            const enterButton = await page.$('button.enter-button-0');
+        const enterButton = await page.$('button.enter-button-0');
 
-            await enterButton.evaluate(btn => btn.click());
+        await enterButton.evaluate(btn => btn.click());
 
-            await page.keyboard.type(playerOneName);
+        await page.keyboard.type(playerOneName);
 
-            const setUsernameButton = await page.$('button.set-username-btn');
+        const setUsernameButton = await page.$('button.set-username-btn');
 
-            await setUsernameButton.evaluate(btn => btn.click());
-        }, 7000)
+        await setUsernameButton.evaluate(btn => btn.click());
 
+        //player 2
 
-        setTimeout(async () => {
-            const enterButton = await secondPage.$('button.enter-button-0');
+        const secondPageEnterButton = await secondPage.$('button.enter-button-0');
 
-            await enterButton.evaluate(btn => btn.click());
+        const secondPageUsernameButton = await secondPage.$('button.set-username-btn');
 
-            await secondPage.keyboard.type(playerTwoName);
+        await secondPageEnterButton.evaluate(btn => btn.click());
 
-            const setUsernameButton = await secondPage.$('button.set-username-btn');
+        await secondPage.keyboard.type(playerTwoName);
 
-            await setUsernameButton.evaluate(btn => btn.click());
-        }, 8000)
+        await secondPageUsernameButton.evaluate(btn => btn.click());
 
-        setTimeout(async () => {
-            const startButton = await page.$('button.start-button');
+        const startButton = await secondPage.$('button.start-button');
 
-            await expect(startButton).not.toBe(null);
-        }, 9000)
+        await expect(startButton).not.toBe(null);
 
     })
-    
+
 })
