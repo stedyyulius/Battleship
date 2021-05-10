@@ -22,7 +22,7 @@ describe('room integration test', () => {
 
         secondBrowser = await puppeteer.launch({
             headless: false,
-            slowMo: 500
+            slowMo: 100
         })
 
         secondPage = await secondBrowser.newPage();

@@ -197,15 +197,19 @@ const Card = props => {
     }
 
     const isJoinedPlayer = () => {
+
         for (const r of props.allRooms) {
-            if (r.players && r.players.length > 0) {
 
-                if (r.players[0].id === playerId) {
-                    return true;
-                }
+            if (r.players) {
+                if (r.players && r.players.length > 0) {
 
-                if (r.players.length > 1 && r.players[1].id === playerId) {
-                    return true;
+                    if (r.players[0].id === playerId) {
+                        return true;
+                    }
+
+                    if (r.players.length > 1 && r.players[1].id === playerId) {
+                        return true;
+                    }
                 }
             }
         }
