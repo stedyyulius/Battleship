@@ -1,0 +1,9 @@
+{
+  "preset": "jest-puppeteer",
+  "testEnvironment": "jest-environment-node",
+  "testTimeout": 30000,
+  "testSequencer": "./testSequencer.js",
+  "transformIgnorePatterns": [
+    "node_modules/(?!variables/.*)"
+  ]
+}

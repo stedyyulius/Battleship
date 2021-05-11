@@ -1,7 +1,10 @@
 const puppeteer = require('puppeteer');
 
+const { updateRoom } = require('../api/room');
+
 const playerOneName = 'stedy';
 const playerTwoName = 'poppy';
+const roomNumber = 0;
 
 describe('room integration test', () => {
 
@@ -22,7 +25,7 @@ describe('room integration test', () => {
 
         secondBrowser = await puppeteer.launch({
             headless: false,
-            slowMo: 100
+            slowMo: 500
         })
 
         secondPage = await secondBrowser.newPage();
@@ -31,20 +34,17 @@ describe('room integration test', () => {
     })
 
     afterAll(async () => {
-        const playerOneLeaveButton = await page.$('button.leave-button');
 
-        await playerOneLeaveButton.evaluate(btn => btn.click());
-
-        const playerTwoLeaveButton = await secondPage.$('button.leave-button');
-
-        await playerTwoLeaveButton.evaluate(btn => btn.click());
+        await updateRoom({
+            id: roomNumber
+        })
 
         await browser.close();
         await secondBrowser.close();
     })
 
     test('player one should be able to join room', async () => {
-        const enterButton = await page.$('button.enter-button-0');
+        const enterButton = await page.$(`button.enter-button-${roomNumber}`);
 
         await enterButton.evaluate(btn => btn.click());
 
@@ -66,7 +66,7 @@ describe('room integration test', () => {
     test('player 2 able to join a room', async () => {
 
 
-        const enterButton = await secondPage.$('button.enter-button-0');
+        const enterButton = await secondPage.$(`button.enter-button-${roomNumber}`);
 
         await enterButton.evaluate(btn => btn.click());
 
@@ -98,7 +98,7 @@ describe('room integration test', () => {
 
     test('start button should appear when 2 players inside a room', async () => {
 
-        const enterButton = await page.$('button.enter-button-0');
+        const enterButton = await page.$(`button.enter-button-${roomNumber}`);
 
         await enterButton.evaluate(btn => btn.click());
 
@@ -110,7 +110,7 @@ describe('room integration test', () => {
 
         //player 2
 
-        const secondPageEnterButton = await secondPage.$('button.enter-button-0');
+        const secondPageEnterButton = await secondPage.$(`button.enter-button-${roomNumber}`);
 
         const secondPageUsernameButton = await secondPage.$('button.set-username-btn');
 

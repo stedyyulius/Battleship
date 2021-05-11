@@ -1,7 +1,10 @@
 const puppeteer = require('puppeteer');
 
+const { updateRoom } = require('../api/room');
+
 const playerOneName = 'willy';
 const playerTwoName = 'niko';
+const roomNumber = 0;
 
 describe('Board integration test', () => {
     beforeAll(async () => {
@@ -23,7 +26,7 @@ describe('Board integration test', () => {
 
         await secondPage.goto('http://localhost:3000');
 
-        const enterButton = await page.$('button.enter-button-0');
+        const enterButton = await page.$(`button.enter-button-${roomNumber}`);
 
         await enterButton.evaluate(btn => btn.click());
 
@@ -35,7 +38,7 @@ describe('Board integration test', () => {
 
         //player 2
 
-        const secondEnter = await secondPage.$('button.enter-button-0');
+        const secondEnter = await secondPage.$(`button.enter-button-${roomNumber}`);
 
         await secondEnter.evaluate(btn => btn.click());
 
@@ -48,6 +51,14 @@ describe('Board integration test', () => {
     })
 
     afterAll(async () => {
+
+        await updateRoom({
+            id: roomNumber,
+            players: [],
+            boards: [],
+            status: 'idle'
+        });
+
         await browser.close();
         await secondBrowser.close();
     })
@@ -61,10 +72,9 @@ describe('Board integration test', () => {
         console.log(secondPage.url())
 
         setTimeout(async () => {
-            expect(secondPage.url()).toBe('http://localhost:3000/duelroom/0');
+            expect(secondPage.url()).toBe(`http://localhost:3000/duelroom/${roomNumber}`);
 
             const playerTwoLeaveButton = await secondPage.$('button.leave-button');
-
 
             await playerTwoLeaveButton.evaluate(btn => btn.click());
 
