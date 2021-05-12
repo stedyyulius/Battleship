@@ -1,6 +1,9 @@
 {
-  "preset": "jest-puppeteer",
-  "testEnvironment": "jest-environment-node",
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "transform": {
+    "node_modules/variables/.+\\.(j|t)sx?$": "ts-jest"
+  },
   "testTimeout": 30000,
   "testSequencer": "./testSequencer.js",
   "transformIgnorePatterns": [

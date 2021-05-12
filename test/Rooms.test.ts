@@ -1,6 +1,6 @@
-const puppeteer = require('puppeteer');
+import puppeteer from 'puppeteer';
 
-const { updateRoom } = require('../api/room');
+import { updateRoom } from '../api/room';
 
 const playerOneName = 'stedy';
 const playerTwoName = 'poppy';

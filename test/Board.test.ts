@@ -1,12 +1,19 @@
-const puppeteer = require('puppeteer');
+import puppeteer from 'puppeteer';
 
-const { updateRoom } = require('../api/room');
+import { updateRoom } from '../api/room';
 
 const playerOneName = 'willy';
 const playerTwoName = 'niko';
 const roomNumber = 0;
 
 describe('Board integration test', () => {
+
+
+    let browser;
+    let page;
+    let secondBrowser;
+    let secondPage;
+
     beforeAll(async () => {
 
         browser = await puppeteer.launch({
